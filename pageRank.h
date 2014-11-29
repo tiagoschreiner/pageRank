@@ -5,10 +5,17 @@
 extern "C" {
 #endif
 
+typedef struct pageS{
+    int codigo;
+    char nome[30];
+    struct pageS **page;
+}pageS;
 
+pageS* criaPagina(pageS* page);
+void insere(pageS** page, char *nome, char *nomeRef);
+void busca(pageS* page, char* nome[30]);
 
-
-#ifdef __cplusplusl
+#ifdef __cplusplus
 }
 #endif
 
