@@ -11,9 +11,9 @@ typedef struct pageS{
     struct pageS **page;
 }pageS;
 
-pageS* criaPagina(pageS* page);
-void insere(pageS** page, char *nome, char *nomeRef);
-void busca(pageS* page, char* nome[30]);
+pageS* criaPagina(char *nome, int codRef);
+void insere(pageS** page, char *nome, int codRef);
+void busca(pageS* page, char *nome);
 
 #ifdef __cplusplus
 }
