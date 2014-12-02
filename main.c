@@ -5,27 +5,32 @@
 
 int main(void)
 {
-    pageS* page = NULL;
+    grafoS* grafo = NULL;
     char nome[30];
-    int codigo, opcao = 5;
+    int codigo, codigoRef, opcao = 5;
 
     while(opcao != 0){
         printf("\n1 - Insere\n"
                "2 - Adicionar Referencia\n"
-               "3 - Busca\n");
+               "3 - Busca\n"
+               "4 - Mostra Tudo\n");
         scanf("%d",&opcao);
 
         if(opcao == 1){
             printf("\nDigite o nome do site: ");
             fflush(stdin);
             gets(nome);
-            printf("Digite o codigo como referencia: ");
-            scanf("%d",&codigo);
-            insere(&page, nome, codigo);
+            insere(&grafo, nome);
         }else if(opcao == 2){
-            /*adiciona uma referencia a uma pagina*/
+            printf("Digite o codigo do site: ");
+            scanf("%d",&codigo);
+            printf("Digite o codigo do site que o referencia: ");
+            scanf("%d",&codigoRef);
+            insereRef(grafo, codigo, codigoRef);
         }else if(opcao == 3){
             printf("busca a implementar");
+        }else if(opcao == 4){
+            mostraTudo(grafo);
         }
 
     }

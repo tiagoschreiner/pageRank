@@ -8,12 +8,20 @@ extern "C" {
 typedef struct pageS{
     int codigo;
     char nome[30];
-    struct pageS **page;
+    int *codRef, quantRef;
 }pageS;
 
-pageS* criaPagina(char *nome, int codRef);
-void insere(pageS** page, char *nome, int codRef);
-void busca(pageS* page, char *nome);
+typedef struct grafoS{
+    struct pageS **page;
+}grafoS;
+
+void criaPagina(grafoS *grafo, char *nome);
+grafoS* criaGrafo();
+void insere(grafoS **grafo, char *nome);
+pageS* procuraPage(grafoS *grafo, int codPage);
+void insereRef(grafoS *grafo, int codPage, int codRef);
+void busca(grafoS* grafo, char *nome);
+void mostraTudo(grafoS* grafo);
 
 #ifdef __cplusplus
 }
