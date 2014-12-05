@@ -13,9 +13,8 @@ int main(void)
         printf("\n1 - Insere Pagina\n"
                "2 - Inicilizar pageRank\n"
                "3 - Adicionar Referencia\n"
-               "4 - Recalcular pageRank\n"
-               "5 - Busca\n"
-               "6 - Mostra Tudo\n");
+               "4 - Calcula pageRank\n"
+               "5 - Mostra Tudo\n");
         scanf("%d",&opcao);
 
         if(opcao == 1){
@@ -36,14 +35,9 @@ int main(void)
             printf("Digite o codigo da pagina que o referencia: ");
             scanf("%d",&codigoRef);
             insereRef(grafo, codigo, codigoRef);
-            if(flag != 0 )
-                calculaPageRank(&grafo);
         }else if(opcao == 4){
-            if(flag != 0 )
-                calculaPageRank(&grafo);
+            calculaPageRank(grafo);
         }else if(opcao == 5){
-            printf("busca a implementar");
-        }else if(opcao == 6){
             mostraTudo(grafo);
         }
 

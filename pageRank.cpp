@@ -4,6 +4,10 @@
 #include "pageRank.h"
 
 #define d 0.85
+/*d = damping
+ *Um usuario que randomicamente clica em links, vai eventualmente parar de clicar,a probabilidade de que em
+ * qualquer hora ele poderá continuar é o fator d(damping)
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,6 +16,7 @@ extern "C" {
 int cod = 0;
 int tamGrafo = 0;
 
+/*cria e aloca a pagina*/
 void criaPagina(grafoS *grafo, char* nome)
 {
     pageS* page = (pageS*) malloc(sizeof(pageS));
@@ -20,6 +25,7 @@ void criaPagina(grafoS *grafo, char* nome)
     page->codigo = cod;
     grafo->page[tamGrafo] = page;
     page->quantRef = 0;
+    page->quantLinksAponta = 0;
 
     system("cls");
     printf("\nCodigo da Pagina: %d\n",cod);
@@ -29,6 +35,7 @@ void criaPagina(grafoS *grafo, char* nome)
     cod++;
 }
 
+/*cria e aloca vetor inicial do grafo*/
 grafoS* criaGrafo()
 {
     grafoS* grafo = (grafoS*) malloc(sizeof(grafoS));
@@ -36,6 +43,7 @@ grafoS* criaGrafo()
     return grafo;
 }
 
+/*insere paginas*/
 void insere(grafoS **grafo, char* nome)
 {
     if(*grafo ==  NULL){
@@ -47,17 +55,23 @@ void insere(grafoS **grafo, char* nome)
 }
 
 /*retorna a page se ela existe de acordo com o codigo*/
-pageS* procuraPage(grafoS* grafo, int codPage)
+pageS* procuraPage(grafoS* grafo, int codPage, int aux)
 {
+    /*aux usado para saber se quer saber se é
+     * é para procurar cod de referencia, ou
+     *cod pagina normal ||  0 = codPage || 1 = codRef
+     *Isso é usado para calcular os OutBounds de cada page*/
     int i;
     for(i = 0; i < tamGrafo; i++)
-        if(grafo->page[i]->codigo == codPage)
+        if(grafo->page[i]->codigo == codPage){
+            if(aux == 1)
+                grafo->page[i]->quantLinksAponta ++;
             return grafo->page[i];
-
+        }
     return NULL;
 }
 
-/*verifica se a page existe de acordo com o codigo de referencia*/
+/*verifica se a page existe de acordo com o codigo*/
 bool verificaPageRef(grafoS* grafo, int codRef)
 {
     int i;
@@ -68,19 +82,19 @@ bool verificaPageRef(grafoS* grafo, int codRef)
     return false;
 }
 
-/*insere a o codigo da page que o referencia*/
+/*insere o codigo da page que o referencia*/
 void insereRef(grafoS *grafo, int codPage, int codRef)
 {
     pageS* page = NULL;
 
-    if(procuraPage(grafo, codPage) != NULL){
+    if(procuraPage(grafo, codPage,0) != NULL){
         if(verificaPageRef(grafo, codRef)){
-            page = procuraPage(grafo, codPage);
+            page = procuraPage(grafo, codPage,0);
             if(page->quantRef == 0)
-                page->pageRef[page->quantRef] = procuraPage(grafo, codRef);
+                page->pageRef[page->quantRef] = procuraPage(grafo, codRef,1);
             else{
                 realloc(page->pageRef, page->quantRef * sizeof(pageS));
-                page->pageRef[page->quantRef] = procuraPage(grafo, codRef);
+                page->pageRef[page->quantRef] = procuraPage(grafo, codRef,1);
             }
             page->quantRef++;
         }else
@@ -95,12 +109,14 @@ void mostraTudo(grafoS* grafo)
     int i, i2;
     system("cls");
     for(i = 0; i < tamGrafo; i++ ){
-        printf("Codigo Page: %d\n", grafo->page[i]->codigo);
-        printf("Nome page  : %s\n", grafo->page[i]->nome);
-        printf("pageRank   : %f\n", grafo->page[i]->rank);
+        printf("Codigo Page         : %d\n", grafo->page[i]->codigo);
+        printf("Nome page           : %s\n", grafo->page[i]->nome);
+        printf("pageRank            : %f\n", grafo->page[i]->rank);
+        printf("OutBound links      : %d\n", grafo->page[i]->quantLinksAponta);
+        printf("Links referenciados : %d\n", grafo->page[i]->quantRef);
         for(i2 = 0; i2 < grafo->page[i]->quantRef; i2 ++)
-            printf("%d  ", grafo->page[i]->pageRef[i2]->codigo);
-        printf("\n");
+            printf("%d ", grafo->page[i]->pageRef[i2]->codigo);
+        printf("\n\n");
     }
 }
 
@@ -108,32 +124,20 @@ void mostraTudo(grafoS* grafo)
 void inicializaPageRank(grafoS* grafo)
 {
     int i;
-    for(i = 0; i < tamGrafo; i++){
+    for(i = 0; i < tamGrafo; i++)
         grafo->page[i]->rank = (float) 1.0 / tamGrafo;
-    }
 }
 
 /*calcula o rank de cada pagina*/
-void calculaPageRank(grafoS** grafo)
+void calculaPageRank(grafoS* grafo)
 {
-    int i;
-    for(i = 0; i < tamGrafo; i++)
-        calculaRank((*grafo)->page[i]);
-}
-
-void calculaRank(pageS* page)
-{
-    int i;
-    float somaRankPageRef = 0.0;
-
-    if(page->quantRef != 0){
-        /*soma os ranks das page que referenciam a page atual*/
-        for(i = 0; i < page->quantRef; i ++)
-            somaRankPageRef += getPageRank(page->pageRef[i]);
-
-        printf("%s %f\n", page->nome, somaRankPageRef);
-        /*junta as duas partes da formula e insere o novo rank à page*/
-        page->rank = (((0.15 / tamGrafo) + 0.85) * somaRankPageRef);
+    int i,i2;
+    float somaRank = 0.0;
+    for(i = 0; i < tamGrafo; i++){
+        somaRank = 0.0;
+        for(i2 = 0; i2 < grafo->page[i]->quantRef; i2 ++)
+            somaRank += getPageRank(grafo->page[i]->pageRef[i2]);
+        grafo->page[i]->rank = ((1.0 - d) / (float)tamGrafo) + ( d * somaRank);
     }
 }
 
@@ -141,19 +145,14 @@ void calculaRank(pageS* page)
 float getPageRank(pageS* page)
 {
     if(page != NULL){
-        if(page->quantRef != 0)
-            return ((float) page->rank / page->quantRef);
+        if(page->quantLinksAponta != 0)
+            return ( page->rank / ((float) page->quantLinksAponta));
         else
             return 0.0;
     }else
         return 0.0;
 }
 
-void busca(grafoS* grafo, char *nome)
-{
-    pageS** page;
-    float* rank;
-}
 
 #ifdef __cplusplus
 }

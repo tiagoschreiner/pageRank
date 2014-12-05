@@ -9,6 +9,7 @@ typedef struct pageS{
     int codigo;
     char nome[30];
     float rank;
+    int quantLinksAponta;
     int quantRef;
     struct pageS** pageRef;
 }pageS;
@@ -20,14 +21,12 @@ typedef struct grafoS{
 void criaPagina(grafoS *grafo, char *nome);
 grafoS* criaGrafo();
 void insere(grafoS **grafo, char *nome);
-pageS* procuraPage(grafoS *grafo, int codPage);
+pageS* procuraPage(grafoS* grafo, int codPage, int aux);
 void insereRef(grafoS *grafo, int codPage, int codRef);
-void busca(grafoS* grafo, char *nome);
 void mostraTudo(grafoS* grafo);
 void inicializaPageRank(grafoS* grafo);
 float getPageRank(pageS* page);
-void calculaPageRank(grafoS** grafo);
-void calculaRank(pageS* page);
+void calculaPageRank(grafoS* grafo);
 
 #ifdef __cplusplus
 }
